@@ -7,11 +7,11 @@ import json
 class OptimizationAgent:
     
     PRIORITY_WEIGHTS = {
-        PriorityLevel.OBLIGATORY: 100,
-        PriorityLevel.HIGH: 75,
-        PriorityLevel.MEDIUM: 50,
-        PriorityLevel.LOW: 25,
-        PriorityLevel.DISCRETIONARY: 10
+        PriorityLevel.OBOWIAZKOWY: 100,
+        PriorityLevel.WYSOKI: 75,
+        PriorityLevel.SREDNI: 50,
+        PriorityLevel.NISKI: 25,
+        PriorityLevel.UZNANIOWY: 10
     }
     
     PROTECTED_KEYWORDS = [
@@ -60,8 +60,8 @@ class OptimizationAgent:
             "over_percentage": (variance / global_limit.total_limit * 100) if global_limit.total_limit > 0 else 0,
             "priority_breakdown": priority_breakdown,
             "department_breakdown": {code: amount for code, amount in dept_breakdown},
-            "obligatory_total": priority_breakdown.get('obligatory', 0),
-            "discretionary_total": priority_breakdown.get('discretionary', 0)
+            "obowiązkowy_total": priority_breakdown.get('obowiązkowy', 0),
+            "uznaniowy_total": priority_breakdown.get('uznaniowy', 0)
         }
     
     def generate_cut_suggestions(self, target_reduction: float = None, year: int = 2025) -> Dict:
@@ -107,7 +107,7 @@ class OptimizationAgent:
                 savings = entry_amount
                 reason = f"Przełożenie na {year + 1} - zadanie nie jest krytyczne w roku {year}"
             else:
-                reduction_rate = 0.3 if entry.priority in ['medium', 'low'] else 0.2
+                reduction_rate = 0.3 if entry.priority in ['średni', 'niski'] else 0.2
                 suggested_amount = entry_amount * (1 - reduction_rate)
                 savings = entry_amount - suggested_amount
                 action = "reduce"
@@ -122,7 +122,7 @@ class OptimizationAgent:
                 "savings": savings,
                 "action": action,
                 "reason": reason,
-                "priority": entry.priority if entry.priority else "medium",
+                "priority": entry.priority if entry.priority else "średni",
                 "deferral_score": score,
                 "is_deferrable": is_deferrable
             }
@@ -150,8 +150,11 @@ class OptimizationAgent:
         }
     
     def _calculate_deferral_score(self, entry: BudgetEntry) -> float:
-        priority_str = entry.priority if entry.priority else 'medium'
-        score = 100 - self.PRIORITY_WEIGHTS.get(PriorityLevel(priority_str), 50)
+        priority_str = entry.priority if entry.priority else 'średni'
+        try:
+            score = 100 - self.PRIORITY_WEIGHTS.get(PriorityLevel(priority_str), 50)
+        except ValueError:
+            score = 50  # default for unknown priority
         
         content = self._get_entry_content(entry)
         
@@ -192,7 +195,7 @@ class OptimizationAgent:
             if keyword in content:
                 return False
         
-        return entry.priority in ['low', 'discretionary']
+        return entry.priority in ['niski', 'uznaniowy']
     
     def _get_entry_content(self, entry: BudgetEntry) -> str:
         fields = [

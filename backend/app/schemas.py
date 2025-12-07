@@ -6,8 +6,8 @@ from typing import Optional, List, Literal
 from datetime import datetime
 from enum import Enum
 
-# Valid values for validation
-VALID_PRIORITIES = ['obligatory', 'high', 'medium', 'low', 'discretionary']
+# Valid values for validation - Polish priorities
+VALID_PRIORITIES = ['obowiązkowy', 'wysoki', 'średni', 'niski', 'uznaniowy']
 VALID_STATUSES = ['draft', 'submitted', 'approved', 'rejected', 'needs_revision']
 
 class DepartmentBase(BaseModel):
@@ -45,7 +45,7 @@ class BudgetEntryBase(BaseModel):
     kwota_2028: float = 0
     kwota_2029: float = 0
     
-    priority: str = "medium"
+    priority: str = "średni"
     is_obligatory: bool = False
     
     etap_dzialan: Optional[str] = None
@@ -59,9 +59,19 @@ class BudgetEntryBase(BaseModel):
     @field_validator('priority')
     @classmethod
     def validate_priority(cls, v):
+        # Map old English priorities to Polish for backward compatibility
+        priority_mapping = {
+            'obligatory': 'obowiązkowy',
+            'high': 'wysoki',
+            'medium': 'średni',
+            'low': 'niski',
+            'discretionary': 'uznaniowy'
+        }
+        if v in priority_mapping:
+            return priority_mapping[v]
         if v and v not in VALID_PRIORITIES:
             raise ValueError(f'priority must be one of {VALID_PRIORITIES}')
-        return v or 'medium'
+        return v or 'średni'
 
 class BudgetEntryCreate(BudgetEntryBase):
     department_id: int

@@ -17,11 +17,11 @@ class BudgetStatus(str, enum.Enum):
     NEEDS_REVISION = "needs_revision"
 
 class PriorityLevel(str, enum.Enum):
-    OBLIGATORY = "obligatory"
-    HIGH = "high"
-    MEDIUM = "medium"
-    LOW = "low"
-    DISCRETIONARY = "discretionary"
+    OBOWIAZKOWY = "obowiązkowy"      # Obligatory - required by law
+    WYSOKI = "wysoki"                # High priority
+    SREDNI = "średni"                # Medium priority  
+    NISKI = "niski"                  # Low priority
+    UZNANIOWY = "uznaniowy"          # Discretionary
 
 class Department(Base):
     """Departments (Komórki Organizacyjne) in the Ministry"""
@@ -81,7 +81,7 @@ class BudgetEntry(Base):
     kwota_2028 = Column(Float, default=0)
     kwota_2029 = Column(Float, default=0)
     
-    priority = Column(String(50), default="medium")
+    priority = Column(String(50), default="średni")
     status = Column(String(50), default="draft")
     is_obligatory = Column(Boolean, default=False)
     

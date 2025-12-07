@@ -44,7 +44,7 @@ class ExportAgent:
                     entry.kwota_2028 or 0,
                     entry.kwota_2029 or 0
                 ]),
-                'Priorytet': entry.priority if entry.priority else 'medium',
+                'Priorytet': entry.priority if entry.priority else 'średni',
                 'Obligatoryjne': 'TAK' if entry.is_obligatory else 'NIE',
                 'Status': entry.status if entry.status else 'draft',
                 'Źródło fin.': entry.zrodlo_finansowania or '',
@@ -236,7 +236,7 @@ class ExportAgent:
             row_cells[1].text = (entry.nazwa_zadania or entry.opis_projektu or '')[:50]
             row_cells[2].text = str(entry.paragraf or '')
             row_cells[3].text = f'{getattr(entry, f"kwota_{year}") or 0:,.0f}'
-            row_cells[4].text = entry.priority if entry.priority else 'medium'
+            row_cells[4].text = entry.priority if entry.priority else 'średni'
         
         doc.add_paragraph()
         closing = doc.add_paragraph('Z poważaniem,')

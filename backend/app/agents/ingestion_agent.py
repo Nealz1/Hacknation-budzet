@@ -166,7 +166,7 @@ class IngestionAgent:
             kwota_2029=kwota_2029,
             
             priority=priority,
-            is_obligatory=(priority == 'obligatory'),
+            is_obligatory=(priority == 'obowiązkowy'),
             status='draft',
             
             etap_dzialan=self._safe_get(row, 'etap działań'),
@@ -204,19 +204,19 @@ class IngestionAgent:
         
         for keyword in obligatory_keywords:
             if keyword in combined_text:
-                return 'obligatory'
+                return 'obowiązkowy'
         
         for keyword in discretionary_keywords:
             if keyword in combined_text:
-                return 'discretionary'
+                return 'uznaniowy'
         
         amount = self._parse_float(row.get('2025', row.get(2025.0, row.get(2025, 0))))
         if amount > 10000:
-            return 'high'
+            return 'wysoki'
         elif amount > 1000:
-            return 'medium'
+            return 'średni'
         
-        return 'low'
+        return 'niski'
     
     def _safe_get(self, row, key, default=''):
         val = row.get(key, default)

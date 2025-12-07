@@ -7,6 +7,7 @@ import Conflicts from './components/Conflicts';
 import Departments from './components/Departments';
 import Entries from './components/Entries';
 import Documents from './components/Documents';
+import AuditHistory from './components/AuditHistory';
 
 function App() {
   const [activePage, setActivePage] = useState('dashboard');
@@ -16,6 +17,7 @@ function App() {
     { id: 'dashboard', label: 'Dashboard', icon: '🏠', section: 'główne' },
     { id: 'entries', label: 'Pozycje Budżetowe', icon: '📋', section: 'główne' },
     { id: 'departments', label: 'Departamenty', icon: '🏢', section: 'główne' },
+    { id: 'history', label: 'Historia Zmian', icon: '📜', section: 'główne' },
     { id: 'optimization', label: 'Limit Negotiator', icon: '📊', section: 'agenci' },
     { id: 'compliance', label: 'Compliance Agent', icon: '✅', section: 'agenci' },
     { id: 'conflicts', label: 'Conflict Resolution', icon: '🔄', section: 'agenci' },
@@ -44,6 +46,8 @@ function App() {
         return <Entries setActivePage={setActivePage} />;
       case 'documents':
         return <Documents />;
+      case 'history':
+        return <AuditHistory setActivePage={setActivePage} />;
       default:
         return <Dashboard setActivePage={setActivePage} />;
     }
@@ -51,9 +55,9 @@ function App() {
 
   return (
     <div className="app-container">
-      {}
+      { }
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
-        {}
+        { }
         <div className="sidebar-logo">
           <div className="sidebar-logo-icon">🏛️</div>
           <div>
@@ -62,7 +66,7 @@ function App() {
           </div>
         </div>
 
-        {}
+        { }
         <nav className="sidebar-nav">
           {Object.entries(groupedNav).map(([section, items]) => (
             <div key={section} className="nav-section">
@@ -81,7 +85,7 @@ function App() {
           ))}
         </nav>
 
-        {}
+        { }
         <div style={{ padding: 'var(--spacing-lg)', borderTop: '1px solid var(--border-color)' }}>
           <div className="p-md" style={{ background: 'var(--bg-darker)', borderRadius: 'var(--radius-md)' }}>
             <div className="flex items-center gap-sm mb-sm">
@@ -96,12 +100,12 @@ function App() {
         </div>
       </aside>
 
-      {}
+      { }
       <main className="main-content">
         {renderPage()}
       </main>
 
-      {}
+      { }
       <button
         className="btn btn-primary"
         style={{

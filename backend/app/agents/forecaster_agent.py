@@ -209,7 +209,7 @@ class ForecasterAgent:
         cyber_base = base_data["by_category"].get("cybersecurity", 0)
         if cyber_base > base_data["total"] * 0.3:
             recommendations.append({
-                "priority": "medium",
+                "priority": "średni",
                 "type": "category_concentration",
                 "title": "Koncentracja w cyberbezpieczeństwie",
                 "description": f"Cyberbezpieczeństwo stanowi {(cyber_base/base_data['total'])*100:.0f}% budżetu",
@@ -294,7 +294,7 @@ class ForecasterAgent:
         non_deferrable = []
         
         for entry in entries:
-            if entry.is_obligatory or entry.priority == PriorityLevel.OBLIGATORY:
+            if entry.is_obligatory or entry.priority == PriorityLevel.OBOWIAZKOWY:
                 non_deferrable.append(entry)
             else:
                 deferrable.append(entry)

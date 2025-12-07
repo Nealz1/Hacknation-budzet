@@ -14,7 +14,8 @@ import shutil
 from datetime import datetime
 
 from .database import get_db, init_db
-from .models import BudgetEntry, Department, GlobalLimit, BudgetStatus, PriorityLevel
+from .models import BudgetEntry, Department, GlobalLimit, BudgetStatus, PriorityLevel, BudgetAuditLog
+import json
 from .schemas import (
     DepartmentCreate, DepartmentResponse,
     BudgetEntryCreate, BudgetEntryUpdate, BudgetEntryResponse,
@@ -50,6 +51,53 @@ app.add_middleware(
 docs_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "docs")
 if os.path.exists(docs_path):
     app.mount("/files", StaticFiles(directory=docs_path), name="docs")
+
+# ============================================================================
+# AUDIT LOGGING - Full Version History Tracking
+# ============================================================================
+
+def create_audit_log(
+    db: Session,
+    entry_id: int,
+    action: str,
+    old_values: dict = None,
+    new_values: dict = None,
+    user_id: str = "system",
+    notes: str = None
+):
+    """Create an audit log entry for any budget change"""
+    audit_entry = BudgetAuditLog(
+        entry_id=entry_id,
+        action=action,
+        old_values=json.dumps(old_values, default=str) if old_values else None,
+        new_values=json.dumps(new_values, default=str) if new_values else None,
+        user_id=user_id,
+        notes=notes
+    )
+    db.add(audit_entry)
+    db.commit()
+    return audit_entry
+
+def entry_to_dict(entry: BudgetEntry) -> dict:
+    """Convert a budget entry to a dictionary for audit logging"""
+    return {
+        "id": entry.id,
+        "czesc": entry.czesc,
+        "paragraf": entry.paragraf,
+        "department_id": entry.department_id,
+        "nazwa_zadania": entry.nazwa_zadania,
+        "opis_projektu": entry.opis_projektu,
+        "kwota_2025": entry.kwota_2025,
+        "kwota_2026": entry.kwota_2026,
+        "kwota_2027": entry.kwota_2027,
+        "kwota_2028": entry.kwota_2028,
+        "kwota_2029": entry.kwota_2029,
+        "priority": str(entry.priority) if entry.priority else None,
+        "status": str(entry.status) if entry.status else None,
+        "is_obligatory": entry.is_obligatory,
+        "uwagi": entry.uwagi
+    }
+
 
 @app.get("/api/knowledge/files")
 async def get_knowledge_files():
@@ -176,111 +224,111 @@ async def load_demo_data(db: Session = Depends(get_db)):
         {'dept': 'DTC', 'paragraf': 6060, 'nazwa': 'Wdrożenie rozporządzenia eIDAS2',
          'opis': 'Implementacja europejskiego rozporządzenia o tożsamości cyfrowej',
          'kwota_2025': 13000, 'kwota_2026': 10000, 'kwota_2027': 10434,
-         'priority': 'obligatory', 'bz': '16.5.1.2', 'is_obligatory': True,
+         'priority': 'obowiązkowy', 'bz': '16.5.1.2', 'is_obligatory': True,
          'uzasadnienie': 'Obowiązek wynikający z Rozporządzenia PE i Rady (UE) 2024/1183'},
         
         {'dept': 'DTC', 'paragraf': 6060, 'nazwa': 'Umowa z COI - realizacja zadań Ministra',
          'opis': 'Umowa na realizację przez COI niektórych zadań Ministra Cyfryzacji',
          'kwota_2025': 45000, 'kwota_2026': 47000, 'kwota_2027': 49000,
-         'priority': 'high', 'bz': '16.1.2.1', 'contract': 'COI/2024/001'},
+         'priority': 'wysoki', 'bz': '16.1.2.1', 'contract': 'COI/2024/001'},
         
         {'dept': 'DTC', 'paragraf': 6060, 'nazwa': 'Rozbudowa systemu Dane.gov.pl',
          'opis': 'Rozbudowa Centralnego Repozytorium Danych Publicznych',
          'kwota_2025': 3090, 'kwota_2026': 2500, 'kwota_2027': 2000,
-         'priority': 'medium', 'bz': '16.1.2.1'},
+         'priority': 'średni', 'bz': '16.1.2.1'},
         
         {'dept': 'DTC', 'paragraf': 6060, 'nazwa': 'System dokumentacji prawnej',
          'opis': 'Budowa systemu dokumentacji prawnej dla administracji',
          'kwota_2025': 11933, 'kwota_2026': 5000, 'kwota_2027': 2000,
-         'priority': 'medium', 'bz': '16.1.2.1'},
+         'priority': 'średni', 'bz': '16.1.2.1'},
         
         {'dept': 'DTC', 'paragraf': 4300, 'nazwa': 'Zakup licencji ZPA',
          'opis': 'Licencje oprogramowania dla Zintegrowanej Platformy Analitycznej',
          'kwota_2025': 2500, 'kwota_2026': 2600, 'kwota_2027': 2700,
-         'priority': 'high', 'bz': '16.3.1.1'},
+         'priority': 'wysoki', 'bz': '16.3.1.1'},
         
         {'dept': 'DC', 'paragraf': 4210, 'nazwa': 'Utrzymanie CSIRT GOV',
          'opis': 'Centrum Reagowania na Incydenty Cyberbezpieczeństwa',
          'kwota_2025': 15000, 'kwota_2026': 16500, 'kwota_2027': 18000,
-         'priority': 'obligatory', 'bz': '16.2.1.1', 'is_obligatory': True,
+         'priority': 'obowiązkowy', 'bz': '16.2.1.1', 'is_obligatory': True,
          'uzasadnienie': 'Obowiązek z art. 26 ustawy o krajowym systemie cyberbezpieczeństwa'},
         
         {'dept': 'DC', 'paragraf': 4300, 'nazwa': 'Rozbudowa SOC Ministerstwa',
          'opis': 'Security Operations Center - monitoring 24/7',
          'kwota_2025': 8000, 'kwota_2026': 8500, 'kwota_2027': 9000,
-         'priority': 'high', 'bz': '16.2.1.2'},
+         'priority': 'wysoki', 'bz': '16.2.1.2'},
         
         {'dept': 'DC', 'paragraf': 6060, 'nazwa': 'Ochrona przed atakami DDoS',
          'opis': 'Dostawa urządzeń DefensePro z licencjami',
          'kwota_2025': 8904, 'kwota_2026': 1000, 'kwota_2027': 1000,
-         'priority': 'high', 'bz': '16.2.1.1'},
+         'priority': 'wysoki', 'bz': '16.2.1.1'},
         
         {'dept': 'DC', 'paragraf': 4300, 'nazwa': 'Audyty bezpieczeństwa systemów',
          'opis': 'Zewnętrzne audyty penetracyjne i compliance',
          'kwota_2025': 3500, 'kwota_2026': 3800, 'kwota_2027': 4000,
-         'priority': 'obligatory', 'bz': '16.2.1.3', 'is_obligatory': True,
+         'priority': 'obowiązkowy', 'bz': '16.2.1.3', 'is_obligatory': True,
          'uzasadnienie': 'Wymóg KRI i rozporządzenia w sprawie minimalnych wymagań'},
         
         {'dept': 'DSI', 'paragraf': 6060, 'nazwa': 'Utrzymanie SRP',
          'opis': 'System Rejestrów Państwowych - utrzymanie i rozwój',
          'kwota_2025': 12000, 'kwota_2026': 12500, 'kwota_2027': 13000,
-         'priority': 'obligatory', 'bz': '16.1.1.1', 'is_obligatory': True,
+         'priority': 'obowiązkowy', 'bz': '16.1.1.1', 'is_obligatory': True,
          'uzasadnienie': 'System krytyczny dla funkcjonowania państwa'},
         
         {'dept': 'DSI', 'paragraf': 6060, 'nazwa': 'Infrastruktura Centralnego Serwera Logów',
          'opis': 'Zakup infrastruktury CSL',
          'kwota_2025': 1181, 'kwota_2026': 500, 'kwota_2027': 500,
-         'priority': 'medium', 'bz': '16.1.1.2'},
+         'priority': 'średni', 'bz': '16.1.1.2'},
         
         {'dept': 'DSI', 'paragraf': 4300, 'nazwa': 'System analizy kodu DAST/IAST',
          'opis': 'Rozbudowa systemu do analizy kodu i platform mobilnych',
          'kwota_2025': 1107, 'kwota_2026': 1200, 'kwota_2027': 1300,
-         'priority': 'medium', 'bz': '16.1.1.3'},
+         'priority': 'średni', 'bz': '16.1.1.3'},
         
         {'dept': 'DK', 'paragraf': 4300, 'nazwa': 'Portal gov.pl - utrzymanie',
          'opis': 'Utrzymanie i rozwój portalu informacyjnego gov.pl',
          'kwota_2025': 3500, 'kwota_2026': 3700, 'kwota_2027': 3900,
-         'priority': 'high', 'bz': '16.4.1.1'},
+         'priority': 'wysoki', 'bz': '16.4.1.1'},
         
         {'dept': 'DK', 'paragraf': 4210, 'nazwa': 'Kampanie informacyjne',
          'opis': 'Kampanie edukacyjne dotyczące e-usług',
          'kwota_2025': 2000, 'kwota_2026': 2200, 'kwota_2027': 2400,
-         'priority': 'discretionary', 'bz': '16.4.1.2'},
+         'priority': 'uznaniowy', 'bz': '16.4.1.2'},
         
         {'dept': 'BA', 'paragraf': 4210, 'nazwa': 'Materiały biurowe i eksploatacyjne',
          'opis': 'Zakup materiałów biurowych dla MC',
          'kwota_2025': 500, 'kwota_2026': 520, 'kwota_2027': 540,
-         'priority': 'low', 'bz': '16.6.1.1'},
+         'priority': 'niski', 'bz': '16.6.1.1'},
         
         {'dept': 'BA', 'paragraf': 4270, 'nazwa': 'Utrzymanie budynku MC',
          'opis': 'Konserwacja i naprawy budynku ministerstwa',
          'kwota_2025': 2500, 'kwota_2026': 2600, 'kwota_2027': 2700,
-         'priority': 'medium', 'bz': '16.6.1.2'},
+         'priority': 'średni', 'bz': '16.6.1.2'},
         
         {'dept': 'BBF', 'paragraf': 4300, 'nazwa': 'System finansowo-księgowy',
          'opis': 'Utrzymanie i licencje systemu ERP',
          'kwota_2025': 1500, 'kwota_2026': 1550, 'kwota_2027': 1600,
-         'priority': 'high', 'bz': '16.7.1.1'},
+         'priority': 'wysoki', 'bz': '16.7.1.1'},
         
         {'dept': 'BBF', 'paragraf': 4170, 'nazwa': 'Szkolenia pracowników BBF',
          'opis': 'Szkolenia z zakresu finansów publicznych',
          'kwota_2025': 200, 'kwota_2026': 210, 'kwota_2027': 220,
-         'priority': 'low', 'bz': '16.7.1.2'},
+         'priority': 'niski', 'bz': '16.7.1.2'},
         
         {'dept': 'DTC', 'paragraf': 4300, 'nazwa': 'Usługi chmurowe - Azure/AWS',
          'opis': 'Opłaty za usługi chmurowe dla systemów MC',
          'kwota_2025': 5000, 'kwota_2026': 6000, 'kwota_2027': 7000,
-         'priority': 'high', 'bz': '16.1.2.2'},
+         'priority': 'wysoki', 'bz': '16.1.2.2'},
         
         {'dept': 'DC', 'paragraf': 4210, 'nazwa': 'Sprzęt sieciowy - MC',
          'opis': 'Zakup urządzeń sieciowych dla Ministerstwa',
          'kwota_2025': 2000, 'kwota_2026': 1500, 'kwota_2027': 1500,
-         'priority': 'medium', 'bz': '16.2.1.4'},
+         'priority': 'średni', 'bz': '16.2.1.4'},
         
         {'dept': 'DSI', 'paragraf': 4750, 'nazwa': 'Wymiana komputerów pracowniczych',
          'opis': 'Planowa wymiana stacji roboczych (cykl 4-letni)',
          'kwota_2025': 3000, 'kwota_2026': 3200, 'kwota_2027': 3400,
-         'priority': 'medium', 'bz': '16.1.1.4'},
+         'priority': 'średni', 'bz': '16.1.1.4'},
     ]
     
     entries_created = 0
@@ -290,11 +338,11 @@ async def load_demo_data(db: Session = Depends(get_db)):
             continue
         
         priority_map = {
-            'obligatory': PriorityLevel.OBLIGATORY,
-            'high': PriorityLevel.HIGH,
-            'medium': PriorityLevel.MEDIUM,
-            'low': PriorityLevel.LOW,
-            'discretionary': PriorityLevel.DISCRETIONARY
+            'obowiązkowy': PriorityLevel.OBOWIAZKOWY,
+            'wysoki': PriorityLevel.WYSOKI,
+            'średni': PriorityLevel.SREDNI,
+            'niski': PriorityLevel.NISKI,
+            'uznaniowy': PriorityLevel.UZNANIOWY
         }
         
         entry = BudgetEntry(
@@ -311,7 +359,7 @@ async def load_demo_data(db: Session = Depends(get_db)):
             kwota_2027=entry_data.get('kwota_2027', 0),
             kwota_2028=entry_data.get('kwota_2028', 0),
             kwota_2029=entry_data.get('kwota_2029', 0),
-            priority=priority_map.get(entry_data.get('priority', 'medium'), PriorityLevel.MEDIUM),
+            priority=priority_map.get(entry_data.get('priority', 'średni'), PriorityLevel.SREDNI),
             is_obligatory=entry_data.get('is_obligatory', False),
             status=BudgetStatus.DRAFT,
             nr_umowy=entry_data.get('contract', ''),
@@ -380,13 +428,13 @@ async def load_exact_excel_data(db: Session = Depends(get_db)):
             
             text = str(row.get('szczegółowe uzasadnienie', '')).lower()
             if any(kw in text for kw in ['eidas', 'ustaw', 'obowiązk', 'rozporządzen']):
-                priority = PriorityLevel.OBLIGATORY
+                priority = PriorityLevel.OBOWIAZKOWY
                 is_obligatory = True
             elif any(kw in text for kw in ['rozwój', 'rozbudowa', 'zakup']):
-                priority = PriorityLevel.HIGH
+                priority = PriorityLevel.WYSOKI
                 is_obligatory = False
             else:
-                priority = PriorityLevel.MEDIUM
+                priority = PriorityLevel.SREDNI
                 is_obligatory = False
             
             entry = BudgetEntry(
@@ -486,7 +534,7 @@ async def get_entries(
             "kwota_2027": entry.kwota_2027 or 0,
             "kwota_2028": entry.kwota_2028 or 0,
             "kwota_2029": entry.kwota_2029 or 0,
-            "priority": entry.priority if entry.priority else "medium",
+            "priority": entry.priority if entry.priority else "średni",
             "is_obligatory": entry.is_obligatory,
             "status": entry.status if entry.status else "draft",
             "etap_dzialan": entry.etap_dzialan,
@@ -534,6 +582,17 @@ async def create_entry(
     db.commit()
     db.refresh(db_entry)
     
+    # 📝 AUDIT LOG: Record creation
+    create_audit_log(
+        db=db,
+        entry_id=db_entry.id,
+        action="CREATE",
+        old_values=None,
+        new_values=entry_to_dict(db_entry),
+        user_id="system",
+        notes=f"Utworzono nową pozycję budżetową: {db_entry.nazwa_zadania or 'bez nazwy'}"
+    )
+    
     # Run immediate compliance check
     compliance_agent = ComplianceAgent(db)
     compliance_agent.validate_entry(db_entry)
@@ -562,9 +621,16 @@ async def update_entry(
     if not entry:
         raise HTTPException(status_code=404, detail="Entry not found")
     
+    # 📝 AUDIT LOG: Capture old values before update
+    old_values = entry_to_dict(entry)
+    
     update_data = update.dict(exclude_unset=True)
+    changed_fields = []
     for field, value in update_data.items():
         if hasattr(entry, field):
+            old_val = getattr(entry, field)
+            if old_val != value:
+                changed_fields.append(f"{field}: {old_val} → {value}")
             setattr(entry, field, value)
     
     entry.updated_at = datetime.utcnow()
@@ -572,6 +638,16 @@ async def update_entry(
     
     db.commit()
     db.refresh(entry)
+    
+    create_audit_log(
+        db=db,
+        entry_id=entry_id,
+        action="UPDATE",
+        old_values=old_values,
+        new_values=entry_to_dict(entry),
+        user_id="system",
+        notes=f"Zmieniono: {'; '.join(changed_fields) if changed_fields else 'brak zmian'}"
+    )
     
     compliance_agent = ComplianceAgent(db)
     validation = compliance_agent.validate_entry(entry)
@@ -589,9 +665,20 @@ async def approve_entry(entry_id: int, db: Session = Depends(get_db)):
     if not entry:
         raise HTTPException(status_code=404, detail="Entry not found")
     
+    old_status = entry.status
     entry.status = 'approved'
     entry.updated_at = datetime.utcnow()
     db.commit()
+    
+    create_audit_log(
+        db=db,
+        entry_id=entry_id,
+        action="APPROVE",
+        old_values={"status": str(old_status)},
+        new_values={"status": "approved"},
+        user_id="system",
+        notes=f"Zatwierdzono pozycję budżetową: {entry.nazwa_zadania or entry_id}"
+    )
     
     return {"message": f"Entry {entry_id} approved", "status": "approved"}
 
@@ -603,12 +690,205 @@ async def reject_entry(entry_id: int, reason: str = "", db: Session = Depends(ge
     if not entry:
         raise HTTPException(status_code=404, detail="Entry not found")
     
+    old_status = entry.status
     entry.status = BudgetStatus.REJECTED
     entry.uwagi = (entry.uwagi or '') + f"\n[ODRZUCONO: {reason}]"
     entry.updated_at = datetime.utcnow()
     db.commit()
     
+    # 📝 AUDIT LOG: Record rejection with reason
+    create_audit_log(
+        db=db,
+        entry_id=entry_id,
+        action="REJECT",
+        old_values={"status": str(old_status)},
+        new_values={"status": "rejected", "reason": reason},
+        user_id="system",
+        notes=f"Odrzucono: {reason or 'brak powodu'}"
+    )
+    
     return {"message": f"Entry {entry_id} rejected", "status": "rejected", "reason": reason}
+
+# ============================================================================
+# AUDIT HISTORY API ENDPOINTS - Version History & Recovery
+# ============================================================================
+
+@app.get("/api/entries/{entry_id}/history")
+async def get_entry_history(entry_id: int, db: Session = Depends(get_db)):
+    """Get complete version history for a budget entry"""
+    
+    entry = db.query(BudgetEntry).filter(BudgetEntry.id == entry_id).first()
+    if not entry:
+        raise HTTPException(status_code=404, detail="Entry not found")
+    
+    audit_logs = db.query(BudgetAuditLog).filter(
+        BudgetAuditLog.entry_id == entry_id
+    ).order_by(BudgetAuditLog.timestamp.desc()).all()
+    
+    history = []
+    for log in audit_logs:
+        history.append({
+            "id": log.id,
+            "action": log.action,
+            "timestamp": log.timestamp.isoformat() if log.timestamp else None,
+            "user_id": log.user_id,
+            "notes": log.notes,
+            "old_values": json.loads(log.old_values) if log.old_values else None,
+            "new_values": json.loads(log.new_values) if log.new_values else None
+        })
+    
+    return {
+        "entry_id": entry_id,
+        "entry_name": entry.nazwa_zadania or f"Pozycja #{entry_id}",
+        "total_changes": len(history),
+        "history": history
+    }
+
+@app.get("/api/audit/all")
+async def get_all_audit_history(
+    limit: int = 50,
+    action: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """Get complete audit history across all entries"""
+    
+    query = db.query(BudgetAuditLog).order_by(BudgetAuditLog.timestamp.desc())
+    
+    if action:
+        query = query.filter(BudgetAuditLog.action == action.upper())
+    
+    logs = query.limit(limit).all()
+    
+    history = []
+    for log in logs:
+        entry = db.query(BudgetEntry).filter(BudgetEntry.id == log.entry_id).first()
+        history.append({
+            "id": log.id,
+            "entry_id": log.entry_id,
+            "entry_name": entry.nazwa_zadania if entry else "Usunięta pozycja",
+            "action": log.action,
+            "timestamp": log.timestamp.isoformat() if log.timestamp else None,
+            "user_id": log.user_id,
+            "notes": log.notes
+        })
+    
+    total = db.query(BudgetAuditLog).count()
+    
+    return {
+        "total_audit_records": total,
+        "showing": len(history),
+        "history": history
+    }
+
+@app.post("/api/entries/{entry_id}/restore/{audit_id}")
+async def restore_entry_version(
+    entry_id: int,
+    audit_id: int,
+    db: Session = Depends(get_db)
+):
+    """Restore entry to a previous version from audit history"""
+    
+    entry = db.query(BudgetEntry).filter(BudgetEntry.id == entry_id).first()
+    if not entry:
+        raise HTTPException(status_code=404, detail="Entry not found")
+    
+    audit_log = db.query(BudgetAuditLog).filter(
+        BudgetAuditLog.id == audit_id,
+        BudgetAuditLog.entry_id == entry_id
+    ).first()
+    
+    if not audit_log:
+        raise HTTPException(status_code=404, detail="Audit log not found")
+    
+    # Get the old values from the audit log
+    old_values = json.loads(audit_log.old_values) if audit_log.old_values else None
+    
+    if not old_values:
+        raise HTTPException(status_code=400, detail="No previous values to restore")
+    
+    # Capture current state before restore
+    current_state = entry_to_dict(entry)
+    
+    # Restore values
+    for field, value in old_values.items():
+        if hasattr(entry, field) and field != "id":
+            setattr(entry, field, value)
+    
+    entry.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(entry)
+    
+    # Log the restore action
+    create_audit_log(
+        db=db,
+        entry_id=entry_id,
+        action="RESTORE",
+        old_values=current_state,
+        new_values=old_values,
+        user_id="system",
+        notes=f"Przywrócono do wersji z {audit_log.timestamp}"
+    )
+    
+    return {
+        "message": f"Entry {entry_id} restored to version from {audit_log.timestamp}",
+        "restored_values": old_values,
+        "entry": entry_to_dict(entry)
+    }
+
+@app.get("/api/entries/{entry_id}/compare/{audit_id_a}/{audit_id_b}")
+async def compare_versions(
+    entry_id: int,
+    audit_id_a: int,
+    audit_id_b: int,
+    db: Session = Depends(get_db)
+):
+    """Compare two versions of a budget entry"""
+    
+    log_a = db.query(BudgetAuditLog).filter(
+        BudgetAuditLog.id == audit_id_a,
+        BudgetAuditLog.entry_id == entry_id
+    ).first()
+    
+    log_b = db.query(BudgetAuditLog).filter(
+        BudgetAuditLog.id == audit_id_b,
+        BudgetAuditLog.entry_id == entry_id
+    ).first()
+    
+    if not log_a or not log_b:
+        raise HTTPException(status_code=404, detail="One or both audit logs not found")
+    
+    values_a = json.loads(log_a.new_values) if log_a.new_values else {}
+    values_b = json.loads(log_b.new_values) if log_b.new_values else {}
+    
+    # Find differences
+    diffs = []
+    all_keys = set(values_a.keys()) | set(values_b.keys())
+    for key in all_keys:
+        val_a = values_a.get(key)
+        val_b = values_b.get(key)
+        if val_a != val_b:
+            diffs.append({
+                "field": key,
+                "version_a": val_a,
+                "version_b": val_b
+            })
+    
+    return {
+        "entry_id": entry_id,
+        "version_a": {
+            "audit_id": audit_id_a,
+            "timestamp": log_a.timestamp.isoformat() if log_a.timestamp else None,
+            "action": log_a.action
+        },
+        "version_b": {
+            "audit_id": audit_id_b,
+            "timestamp": log_b.timestamp.isoformat() if log_b.timestamp else None,
+            "action": log_b.action
+        },
+        "differences": diffs,
+        "total_differences": len(diffs)
+    }
+
 
 @app.get("/api/departments", response_model=List[DepartmentResponse])
 async def get_departments(db: Session = Depends(get_db)):

@@ -162,6 +162,28 @@ class ApiService {
     async setGlobalLimit(year, limit) {
         return this.request(`/limits/${year}?limit=${limit}`, { method: 'PUT' });
     }
+
+    // ============================================================================
+    // AUDIT HISTORY - Version Tracking APIs
+    // ============================================================================
+
+    async getEntryHistory(entryId) {
+        return this.request(`/entries/${entryId}/history`);
+    }
+
+    async getAllAuditHistory(limit = 50, action = null) {
+        const params = new URLSearchParams({ limit });
+        if (action) params.append('action', action);
+        return this.request(`/audit/all?${params}`);
+    }
+
+    async restoreVersion(entryId, auditId) {
+        return this.request(`/entries/${entryId}/restore/${auditId}`, { method: 'POST' });
+    }
+
+    async compareVersions(entryId, auditIdA, auditIdB) {
+        return this.request(`/entries/${entryId}/compare/${auditIdA}/${auditIdB}`);
+    }
 }
 
 const api = new ApiService();

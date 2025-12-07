@@ -156,7 +156,7 @@ class DocumentAgent:
                 "nazwa_zadania": (entry.nazwa_zadania or entry.opis_projektu or "Brak nazwy")[:80],
                 "paragraf": entry.paragraf,
                 "kwota": amount,
-                "priorytet": entry.priority if entry.priority else "medium",
+                "priorytet": entry.priority if entry.priority else "średni",
                 "status": entry.status if entry.status else "draft",
                 "obligatoryjne": "TAK" if entry.is_obligatory else "NIE"
             })
@@ -283,7 +283,7 @@ class DocumentAgent:
                 "czesc": entry.czesc,
                 "paragraf": entry.paragraf,
                 "type": "Inwestycyjne" if is_investment else "Bieżące",
-                "priority": entry.priority if entry.priority else "medium"
+                "priority": entry.priority if entry.priority else "średni"
             },
             "financial_summary": {
                 "2025": entry.kwota_2025 or 0,
