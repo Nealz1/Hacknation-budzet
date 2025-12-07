@@ -152,7 +152,7 @@ async def get_dashboard_stats(db: Session = Depends(get_db)):
     ).scalar() or 0
     
     discretionary = db.query(func.sum(BudgetEntry.kwota_2025)).filter(
-        BudgetEntry.priority == PriorityLevel.DISCRETIONARY
+        BudgetEntry.priority == PriorityLevel.UZNANIOWY
     ).scalar() or 0
     
     return DashboardStats(
