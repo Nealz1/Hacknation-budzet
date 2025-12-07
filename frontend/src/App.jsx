@@ -8,6 +8,7 @@ import Departments from './components/Departments';
 import Entries from './components/Entries';
 import Documents from './components/Documents';
 import AuditHistory from './components/AuditHistory';
+import Forecaster from './components/Forecaster';
 
 function App() {
   const [activePage, setActivePage] = useState('dashboard');
@@ -18,6 +19,7 @@ function App() {
     { id: 'entries', label: 'Pozycje Budżetowe', icon: '📋', section: 'główne' },
     { id: 'departments', label: 'Departamenty', icon: '🏢', section: 'główne' },
     { id: 'history', label: 'Historia Zmian', icon: '📜', section: 'główne' },
+    { id: 'forecaster', label: 'Forecaster Agent', icon: '🔮', section: 'agenci' },
     { id: 'optimization', label: 'Limit Negotiator', icon: '📊', section: 'agenci' },
     { id: 'compliance', label: 'Compliance Agent', icon: '✅', section: 'agenci' },
     { id: 'conflicts', label: 'Conflict Resolution', icon: '🔄', section: 'agenci' },
@@ -48,6 +50,8 @@ function App() {
         return <Documents />;
       case 'history':
         return <AuditHistory setActivePage={setActivePage} />;
+      case 'forecaster':
+        return <Forecaster setActivePage={setActivePage} />;
       default:
         return <Dashboard setActivePage={setActivePage} />;
     }

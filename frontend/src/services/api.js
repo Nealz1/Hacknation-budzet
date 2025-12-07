@@ -184,6 +184,22 @@ class ApiService {
     async compareVersions(entryId, auditIdA, auditIdB) {
         return this.request(`/entries/${entryId}/compare/${auditIdA}/${auditIdB}`);
     }
+
+    // ============================================================================
+    // FORECASTER AGENT - Budget Predictions & Anomaly Detection
+    // ============================================================================
+
+    async getForecast(baseYear = 2025, forecastYears = 3) {
+        return this.request(`/forecaster/forecast?base_year=${baseYear}&forecast_years=${forecastYears}`);
+    }
+
+    async getAnomalies(year = 2025) {
+        return this.request(`/forecaster/anomalies?year=${year}`);
+    }
+
+    async optimizeAllocation() {
+        return this.request('/forecaster/optimize-allocation', { method: 'POST' });
+    }
 }
 
 const api = new ApiService();
