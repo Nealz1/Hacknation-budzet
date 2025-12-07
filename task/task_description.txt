@@ -1,0 +1,169 @@
+  System koordynacji planowania budżetu z rozproszoną edycją danych, walidacją
+                     i integracją z dokumentami urzędowymi
+
+Celem jest stworzenie rozwiązania, które usprawni proces planowania budżetu państwowej jednostki
+organizacyjnej poprzez udostępnienie rozproszonej edycji danych, automatyczną synchronizację,
+walidację oraz integrację z dokumentami urzędowymi. Pomóż nam zbudować system eliminujący błędy
+i usprawniający wielomiesięczne planowanie budżetu na rok następny i trzy kolejne lata.
+
+1. Wprowadzenie - opis organizacji, sytuacji i stanu aktualnego
+
+W organizacji administracji publicznej proces planowania budżetu realizowany jest cyklicznie,
+z czteroletnim horyzontem. Rozpoczyna się w czerwcu (zbieranie potrzeb finansowych na rok następny
+i trzy kolejne lata) i trwa do przyjęcia ustawy budżetowej w lutym lub marcu kolejnego roku
+(zatwierdzenie planu finansowego na rok następny).
+
+W tym czasie liczne komórki organizacyjne (16 komórek organizacyjnych), takie jak departamenty, biura
+czy zespoły – zgłaszają, aktualizują i weryfikują swoje potrzeby finansowe w ramach określonych
+rozdziałów, paragrafów i działań budżetu zadaniowego. Dane te wielokrotnie ulegają modyfikacjom,
+co wymaga bieżącej komunikacji, synchronizacji i kontroli jakości. Modyfikacje tworzone są przez
+wszystkie komórki organizacyjne i dotyczą zarówno samych kwot jak i zakresu planowanych do realizacji
+zadań. W szczególności, modyfikacje tworzone są na polecenie i potrzeby Kierownictwa MC.
+
+Aktualnie cały proces opiera się na jednym wielowymiarowym pliku Excel, który pełni rolę centralnej
+bazy danych (ok. 600 wierszy). Plik ten jest monolityczny, ciężki i podatny na uszkodzenia. Użytkownicy
+często doświadczają problemów z wydajnością, zawieszaniem się aplikacji oraz utratą formuł. Brakuje
+również mechanizmów bezpiecznej segmentacji danych – w taki sposób, aby pracownicy danej komórki
+organizacyjnej mieli dostęp wyłącznie do swojego obszaru danych i nie widzieli informacji dotyczących
+innych komórek organizacyjnych. Aktualnie, aby móc przesłać dane do modyfikacji, rozdziela się plik
+excel na poszczególne komórki organizacyjne, celem ich przekazania. Po otrzymaniu informacji zwrotnej
+od wszystkich 16 komórek organizacyjnych, ponownie scala się je tak, aby powstał jeden plik zbiorczy.
+
+Utrzymanie poprawności danych wymaga dużego nakładu pracy osób zajmujących się planowaniem
+budżetu. Gubione formuły podczas scalania, błędne sumy po modyfikacji, przypadkowe nadpisania
+i konflikty wersji znacząco obniżają jakość procesu. Ponadto dokumenty urzędowe tworzone w Wordzie
+nie są zintegrowane ze źródłem danych, co powoduje konieczność ręcznych aktualizacji i zwiększa
+ryzyko błędów.
+
+Proces planowania jest również regulowany przez przepisy prawa, w tym rozporządzenia dotyczące
+klasyfikacji budżetowej. W praktyce oznacza to konieczność poprawnego mapowania kategorii
+budżetowych i blokowania możliwości wprowadzania danych sprzecznych z regulacjami.
+
+Szczegółowy opis procesu planowania budżetu znajduje się w załączniku nr 1. Przykładowa tabela
+zbiorcza, która jest obecnie stosowana jest w procesie planowania budżetu (wraz z informacjami
+szczegółowymi), znajduje się w załączniku nr 2. Przykładowe pismo wykorzystywane na etapie
+planowania budżetu stanowi załącznik nr 3.
+
+Załączniki będą udostępnione w dniu wydarzenia na kanale Discord.
+Celem wyzwania jest opracowanie rozwiązania, które:
+
+   •    udostępni modularny dostęp do danych budżetowych,
+   •    umożliwi równoległą edycję danych,
+   •    zapewni pełną walidację,
+   •    zautomatyzuje scalanie,
+   •    umożliwi integrację z systemami raportowymi i dokumentami urzędowymi,
+   •    zapewni generowanie zestawień.
+
+Rozwiązanie powinno zwiększyć przejrzystość, bezpieczeństwo i odporność procesu, zmniejszyć liczbę
+błędów oraz poprawić komfort pracy użytkowników spoza środowiska technologicznego.
+
+Szczegółowe, oczekiwane rezultaty opisano w pkt 3.
+
+2. Wyzwanie
+
+Stworzenie rozwiązania informatycznego, które umożliwia rozdzieloną edycję danych budżetowych
+przez wiele komórek organizacyjnych w sposób bezpieczny i ograniczony do zakresu kompetencji
+użytkowników, z możliwością automatycznego scalania, walidacji i integracji z dokumentami w Wordzie,
+generowanymi w procesie planowania.
+
+3. Oczekiwany rezultat
+
+Oczekiwanym rezultatem jest działające rozwiązanie (np. aplikacja webowa, moduł, system), które:
+
+    •   umożliwi każdej komórce organizacyjnej edytowanie danych wyłącznie w swoim zakresie,
+        w ściśle określonym terminie wprowadzania zmian, ustalonym przez komórkę odpowiedzialną
+        za planowanie budżetu,
+    •   automatycznie scali dane do centralnego master-repozytorium,
+    •   zapewni walidację formuł, sum oraz poprawność klasyfikacji budżetowej,
+    •   zablokuje możliwość przesyłania danych, gdy nie wszystkie wymagane informacje są
+        uzupełnione,
+    •   umożliwi generowanie zestawień w formacie Excel oraz import danych do systemu finansowo-
+        księgowego, co ułatwi dalszą analizę i raportowanie,
+    •   będzie zintegrowane z procesem generowania dokumentów w programie Word, co usprawni
+        tworzenie niezbędnej dokumentacji,
+    •   pozwoli na zapisywanie różnych wersji zestawień, co umożliwi śledzenie zmian i powrót
+        do wcześniejszych danych w razie potrzeby,
+    •   umożliwi łatwe prezentowanie danych, co zwiększy ich przejrzystość i ułatwi podejmowanie
+        decyzji.
+
+Użytkownikiem końcowym są pracownicy komórek organizacyjnych, osoby zarządzające budżetem
+(Biuro Budżetowo-Finansowe) oraz Kierownictwo Ministerstwa Cyfryzacji.
+
+4. Wymagania formalne
+
+Projekt przesyłany do oceny powinien zawierać:
+
+   •     szczegółowy opis i tytuł projektu,
+
+   •     prezentację w formacie PDF (maksymalnie 10 slajdów),
+   •     film umieszczony w dostępnym, otwartym repozytorium (link), trwający maksymalnie 3 minuty
+        i prezentujący projekt.
+
+Dodatkowo może zawierać:
+
+   •     repozytorium kodu,
+
+   •     zrzuty ekranu,
+
+   •     linki do demonstracji,
+
+   •     materiały graficzne lub inne elementy związane z projektem.
+
+5. Wymagania techniczne
+
+Narzędzie powinno być w pełni funkcjonalne oraz zaprojektowane zgodnie z zasadami dobrego UX,
+zapewniając intuicyjną i przyjazną obsługę.
+
+6. Sposób testowania i/lub walidacji
+
+Rozwiązanie będzie oceniane pod kątem:
+
+    •   poprawności synchronizacji danych wielu użytkowników,
+    •   odporności na błędy wprowadzania (walidacja),
+    •   czytelności interfejsu dla użytkownika nie-technicznego,
+    •   poprawnej integracji z dokumentami Word (zaciąganie źródeł danych),
+    •   zgodności z rozporządzeniami (wyciągi w załączeniu).
+
+W trakcie prezentacji uczestnicy powinni zaprezentować:
+
+    •   scenariusz pracy pojedynczej komórki,
+    •   scalanie danych,
+    •   blokadę błędnych operacji,
+    •   końcową prezentację budżetu
+
+7. Dostępne zasoby
+
+Uczestnicy otrzymają w dniu wydarzenia na kanale Discord:
+
+    •   opis procesu planowania budżetu (zał. Nr 1),
+    •   przykładowy arkusz danych (tabela stosowana obecnie w procesie planowania budżetu – zał.
+        Nr 2),
+    •   wyciąg z rozporządzeń (wyciąg nr 1, 2a-2f),
+    •   przykładowy wzór dokumentu Word (zał. Nr 3).
+
+8. Kryteria oceny
+
+   •     Związek z wyzwaniem — 25%
+
+   •     Wdrożeniowy potencjał rozwiązania — 25%
+
+   •     Walidacja i bezpieczeństwo danych — 20%
+   •    UX i ergonomia pracy — 15%
+
+   •    Innowacyjność i prezentacja — 15%
+
+9. Dodatkowe uwagi / kontekst wdrożeniowy
+
+Najlepsze rozwiązania mogą zostać skierowane do pilotażowego wdrożenia w procesie planowania
+budżetu oraz rozwijane z zespołami merytorycznymi. Organizator przewiduje możliwość kontynuowania
+prac projektowych po hackathonie.
+
+Dodatkową wartością może być prezentacja sposobów skalowania systemu na inne jednostki
+administracji państwowej oraz perspektywa rozwoju w kierunku centralnej platformy budżetowej.
+
+10. Kontakt
+
+Podczas wydarzenia dostępni będą mentorzy techniczni i merytoryczni w specjalnie oznaczonym
+punkcie konsultacyjnym. Dodatkowo uruchomiony zostanie kanał komunikacyjny Discord do zgłaszania
+pytań.
+
